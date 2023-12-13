@@ -13,7 +13,6 @@
 #' @param weighting_scheme string to indicate how to weight in the aggregate (see details).
 #' @param reorder_quantiles TRUE to ensure that quantiles are ordered;
 #'   set to FALSE if quantiles in data are already ordered (increasing)
-#' @param n_trim integer denoting the number of models to trim
 #' @param ret_quantiles vector of quantiles to return specifying the aggregate distribution
 #' @param ret_values vector of values to return specifying the aggregate distribution
 #' @param ... additional arguments
@@ -32,8 +31,8 @@
 #'   (additional input `weights` that is a data.frame containing `id` and `weight` columns)
 #'   3. trimming - "cdf_interior", "cdf_exterior",
 #'   "mean_interior", "mean_exterior", following REF (additional inputs ...)
-aggregate_cdfs <- function(data, id_var, group_by, method, ret_quantiles, ret_values = NA,
-                           weighting_scheme = "equal", n_trim = 0, reorder_quantiles = TRUE, ...){
+aggregate_cdfs <- function(data, id_var, group_by = NULL, method, ret_quantiles, ret_values = NA,
+                           weighting_scheme = "equal", reorder_quantiles = TRUE, ...){
   data <- update_id_var_col(data, id_var)
   data.table::setDT(data)
   aggs <- data[,calculate_single_aggregate(quant = quantile,
