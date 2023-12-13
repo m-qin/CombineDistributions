@@ -288,7 +288,7 @@ ggplot(data = preds, aes(x = value, y = quantile)) +
 
     Below is an example of a set of value-quantile pairs and the corresponding piecewise-linear approximation with jumps that would be aggregated by `CombineDistributions`.
 
-    ```{r echo = FALSE}
+```{r echo = FALSE}
 plot_ex = preds %>% filter(id == "A" & value %in% x[x%%7==0])
 aprx = approx(x = plot_ex$quantile, 
               y = plot_ex$value, 
