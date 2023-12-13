@@ -10,7 +10,9 @@ aggregate_cdfs(
   group_by,
   method,
   ret_quantiles,
+  ret_values = NA,
   weighting_scheme = "equal",
+  reorder_quantiles = TRUE,
   ...
 )
 }
@@ -25,6 +27,9 @@ Specify cdf with \code{quantile} and \code{value} columns,}
 \item{method}{character name of the method for aggregation (see details).}
 
 \item{weighting_scheme}{string to indicate how to weight in the aggregate (see details).}
+
+\item{reorder_quantiles}{TRUE to ensure that quantiles are ordered;
+set to FALSE if quantiles in data are already ordered (increasing)}
 
 \item{n_trim}{integer denoting the number of models to trim}
 }

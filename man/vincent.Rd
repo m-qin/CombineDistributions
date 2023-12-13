@@ -4,16 +4,26 @@
 \alias{vincent}
 \title{Implement quantile averaging}
 \usage{
-vincent(quantile, value, id, ret_quantiles, weight_fn = equal_weights, ...)
+vincent(
+  quantile,
+  value,
+  id,
+  ret_quantiles,
+  ret_values,
+  weight_fn = equal_weights,
+  ...
+)
 }
 \arguments{
 \item{quantile}{vector containing quantiles for all cdfs to be aggregated}
 
 \item{value}{vector containing values for all cdfs to be aggregated}
 
-\item{id}{vector containing unqiue ids to distinguish cdf to be aggregated}
+\item{id}{vector containing unique ids to distinguish cdf to be aggregated}
 
 \item{ret_quantiles}{vector of quantiles to return specifying the aggregate distribution}
+
+\item{ret_values}{vector of values to return specifying the aggregate distribution}
 
 \item{weight_fn}{function? specifying how to weight each model *FIX}
 }

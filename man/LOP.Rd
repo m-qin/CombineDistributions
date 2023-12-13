@@ -4,16 +4,26 @@
 \alias{LOP}
 \title{Implement probability averaging}
 \usage{
-LOP(quantile, value, id, ret_quantiles, weight_fn = equal_weights, ...)
+LOP(
+  quantile,
+  value,
+  id,
+  ret_quantiles,
+  ret_values,
+  weight_fn = equal_weights,
+  ...
+)
 }
 \arguments{
 \item{quantile}{vector containing quantiles for all cdfs to be aggregated}
 
 \item{value}{vector containing values for all cdfs to be aggregated}
 
-\item{id}{vector containing unqiue ids to distinguish cdf to be aggregated}
+\item{id}{vector containing unique ids to distinguish cdf to be aggregated}
 
 \item{ret_quantiles}{vector of quantiles to return specifying the aggregate distribution}
+
+\item{ret_values}{vector of values to return specifying the aggregate distribution}
 
 \item{weight_fn}{function? specifying how to weight each model *FIX}
 }
@@ -29,6 +39,6 @@ This method calculates the (weighted) average of quantiles at a given value
 dat <- expand.grid(id = c("A", "B"),
                    quantile = seq(0,1,0.01))
 dat$value <- ifelse(dat$id == "A", qnorm(dat$quantile), qnorm(dat$quantile, 0,2))
-LOP(dat$quantile, dat$value, dat$id, seq(0,1,0.05))
+LOP(dat$quantile, dat$value, dat$id, seq(0,1,0.05), NA)
 
 }
