@@ -19,9 +19,9 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 
-
-fig_path <- "/Users/eah394/Documents/GitHub/aggregation_methods/figures/general_sir/"
+fig_path <- "figures/"
 ```
 
 This vignette implements the first case study from [@EAH-ms]. We simulate a multi-model effort to evaluate the performance of various aggregation methods when applied to distributions of public health outcomes. 
