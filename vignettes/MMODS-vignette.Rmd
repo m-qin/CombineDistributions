@@ -20,9 +20,10 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
-# knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 
 fig_path <- "figures/"
+data_path <- "data/"
 data_raw_path <- "data-raw/"
 ```
 
@@ -69,12 +70,12 @@ First, we load the data (both individual model projections and post-hoc observat
 
 ```{r load-proj}
 # individual projections
-if (!file.exists("data/MMODS.rda")){
+if (!file.exists(paste0(data_path, "MMODS.rda"))){
   source(paste0(data_raw_path, "MMODS.R"))
 } else data(MMODS)
 
 # observations
-if (!file.exists("data/MMODS_obs.rda")){
+if (!file.exists(paste0(data_path, "MMODS_obs.rda"))){
   source(paste0(data_raw_path, "MMODS_obs.R"))
 } else data(MMODS_obs)
 
