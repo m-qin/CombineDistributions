@@ -1,15 +1,45 @@
 
-# CombineDistributions
+## Michelle Qin's additions for Biostat 777 class
 
-<!-- badges: start -->
-<!-- badges: end -->
+For my Biostat 777 class (taken fall 2023), I was thrilled to create a [website](https://github.com/jhu-statprogramming-fall-2023/biostat777-project3-part1-m-qin) for the R package `CombineDistributions`. I first used `CombineDistributions` two and a half years ago when I worked with Dr. Emily Howerton (the creator of this package), Dr. Cecile Viboud, and other scientists at the [COVID-19 Scenario Modeling Hub](https://covid19scenariomodelinghub.org). Our task was to project U.S. COVID-19 cases, hospitalizations, and deaths from one week to six months ahead. Such long-term infectious disease modeling required us to carefully combine multiple expert modeling teams' projections and quantify their combined uncertainty, motivating Dr. Howerton et al.'s methodological work in this area.
+
+### The `pkgdown` website
+
+Using `pkgdown`, I created a website to help users use the `CombineDistributions` package. I made some customizations in my website:
+
+1. I set the theme of the website to be "yeti", a Bootswatch theme.
+2. I reordered the vignettes in the navbar to start from the introduction rather than following an alphabetical order, which was the default.
+3. In the sidebar of the homepage and in the footer of the website, I credited Dr. Howerton as the author and creator of the package.
+4. I updated the sidebar of the homepage to reflect the license that Dr. Howerton's original package uses [CC-BY-NC](http://creativecommons.org/licenses/by-nc/3.0/).
+5. In the DESCRIPTION file, I wrote a title for the website: "Combine probabilistic predictions by averaging probabilities or quantiles".
+6. I updated the README of the package, which is printed on the homepage of the website as well, to include the [paper](http://doi.org/10.1098/rsif.2022.0659) that Dr. Howerton et al. published after the package was published on [Zenodo](https://doi.org/10.5281/zenodo.7437280).
+
+### Exported functions in this package
+
+`CombineDistributions` exports the following functions:
+
+- `LOP()`: "Given a set of cumulative distribution functions (assume for now: defined on same values), combine using probability averaging (also called linear opinion pool). This method calculates the (weighted) average of quantiles at a given value."
+- `aggregate_cdfs()`, which is defined in the *implementAggregation.R* file: "Given a data.frame containing cdfs, return a single aggregate cdf using specified method."
+- `vincent()`: "Given a set of cumulative distribution functions  (assume for now: defined on same values), combine using quantile averaging (also called Vincent average). This method calculates the (weighted) average of values at a given quantile."
+
+
+A basic example for the function `LOP()`, taken from its documentation:  
+
+    dat <- expand.grid(id = c("A", "B"),
+                       quantile = seq(0,1,0.01))
+    dat$value <- ifelse(dat$id == "A", qnorm(dat$quantile), qnorm(dat$quantile, 0,2))
+    LOP(dat$quantile, dat$value, dat$id, seq(0,1,0.05), NA)
+
+
+# CombineDistributions
 
 This package implements multiple methods for combining probabilistic predictions, including probability and quantile averaging, i.e.,   Linear Opinion Pool (Stone 1961) and Vincent average (Vincent 1912, Ratcliff 1979) respectively, as well as non-equal weighting, including trimming methods (Jose 2014). 
 
 
-All code is licensed under the CC-BY-NC Creative Commons attribution-noncommercial license (http://creativecommons.org/licenses/by-nc/3.0/). This package can be referenced by citing 
+All code is licensed under the CC-BY-NC [(Creative Commons attribution-noncommercial)](http://creativecommons.org/licenses/by-nc/3.0/) license. This package can be referenced by citing 
 
-<center>Howerton et al. Submitted. </center>
+<center> Emily Howerton, Lucie Contamin, & SungmokJung. (2022). eahowerton/CombineDistributions: v0.2 release (v0.2.0). Zenodo. https://doi.org/10.5281/zenodo.7437280 </center>  
+
 
 and is available on GitHub at [https://github.com/eahowerton/CombineDistributions](https://github.com/eahowerton/CombineDistributions).
 
