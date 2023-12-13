@@ -26,6 +26,8 @@ LOP(
 \item{ret_values}{vector of values to return specifying the aggregate distribution}
 
 \item{weight_fn}{function? specifying how to weight each model *FIX}
+
+\item{...}{additional arguments}
 }
 \value{
 vector of values for corresponding \code{ret_quantiles} of aggregate distribution

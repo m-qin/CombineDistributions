@@ -26,6 +26,8 @@ vincent(
 \item{ret_values}{vector of values to return specifying the aggregate distribution}
 
 \item{weight_fn}{function? specifying how to weight each model *FIX}
+
+\item{...}{additional arguments}
 }
 \value{
 vector of values for corresponding \code{ret_quantiles} of aggregate distribution
@@ -39,6 +41,6 @@ This method calculates the (weighted) average of values at a given quantile
 dat <- expand.grid(id = c("A", "B"),
                    quantile = seq(0,1,0.01))
 dat$value <- ifelse(dat$id == "A", qnorm(dat$quantile), qnorm(dat$quantile, 0,2))
-vincent(dat$quantile, dat$value, dat$id, seq(0,1,0.05))
+vincent(dat$quantile, dat$value, dat$id, seq(0,1,0.05), NA)
 
 }

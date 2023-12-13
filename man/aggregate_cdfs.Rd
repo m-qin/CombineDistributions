@@ -12,6 +12,7 @@ aggregate_cdfs(
   ret_quantiles,
   ret_values = NA,
   weighting_scheme = "equal",
+  n_trim = 0,
   reorder_quantiles = TRUE,
   ...
 )
@@ -26,12 +27,18 @@ Specify cdf with \code{quantile} and \code{value} columns,}
 
 \item{method}{character name of the method for aggregation (see details).}
 
+\item{ret_quantiles}{vector of quantiles to return specifying the aggregate distribution}
+
+\item{ret_values}{vector of values to return specifying the aggregate distribution}
+
 \item{weighting_scheme}{string to indicate how to weight in the aggregate (see details).}
+
+\item{n_trim}{integer denoting the number of models to trim}
 
 \item{reorder_quantiles}{TRUE to ensure that quantiles are ordered;
 set to FALSE if quantiles in data are already ordered (increasing)}
 
-\item{n_trim}{integer denoting the number of models to trim}
+\item{...}{additional arguments}
 }
 \value{
 TBD
