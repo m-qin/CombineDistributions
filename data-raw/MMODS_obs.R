@@ -5,7 +5,7 @@ library(httr)
 
 
 countryattr_path <- 'https://raw.githubusercontent.com/MMODS-org/Elicitation-1/main/data/processed/county/county_attributes.xlsx'
-countryattr_local_path <- "data/county_attributes.xlsx"
+countryattr_local_path <- "data/inst/extdata/county_attributes.xlsx"
 countydeaths_path <-'https://raw.githubusercontent.com/MMODS-org/Elicitation-1/main/data/processed/county/time_series_covid19_deaths_US.csv'
 
 # get data
