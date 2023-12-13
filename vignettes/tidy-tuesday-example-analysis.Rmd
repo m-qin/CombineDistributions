@@ -111,7 +111,7 @@ vin <- aggregate_cdfs(data = preds, # predictions
 
 Now, let's plot the individual (black) and aggregate predictions as cumulative distribution functions (CDFs).
 
-```{r plot-cdfs, echo = FALSE, fig.width=7}
+```{r plot-cdfs, fig.width=7}
 # define sample lines for plotting
 lines_LOP_x = c(90, 100, 110, 120)
 lines_LOP = data.frame(value = c(lines_LOP_x, lines_LOP_x), 
@@ -200,7 +200,7 @@ vin_pdf <- data.frame(value = x,
 
 Plotting the results demonstrates the difference between the two methods: the LOP treats individual predictions as alternate possibilities, and retains the uncertainty captured between these individual predictions, whereas the Vincent average treats individual predictions as noisy samples and averages away the uncertainty captured between the predictions.
 
-```{r plot-cdfs2, echo = FALSE}
+```{r plot-cdfs2}
 both_pdf <- ggplot(data = preds_pdf,
                    aes(x = value, y = prob)) +
   geom_line(aes(group = id), color = "black", size = 0.5) +
@@ -216,98 +216,5 @@ both_pdf
 ```
 
 In cases where these rules do not apply, we can obtain aggregate PDFs by sampling from the aggregate CDF. See the SIRS vignette for an example.
-
-### Aggregating across multiple groups
-
-Let's say there are also  death predictions for each model. To illustrate, we add some simple death predictions to our existing `data.frame` of case predictions. 
-    
-```{r}
-# take the predictions from the first example and specify they are  
-# predictions of incident cases
-preds <- preds %>% 
-  mutate(target = "incident cases")
-
-# define predictions of incident deaths for A and B and add to preds data.frame
-preds <- preds %>% 
-  bind_rows(
-    data.frame(value = rep(seq(0,20, 0.1), times = 2), 
-               quantile = c(pnorm(seq(0,20, 0.1), 10, 2), 
-                            pnorm(seq(0,20, 0.1), 12, 3)), 
-               id = sort(rep(LETTERS[1:2],length(seq(0,20, 0.1)))), 
-               target = "incident deaths")
-  )
-```
-
-To aggregate both sets of predictions at the same time, we use the `group_by` argument, where we provide a vector of column names that provide additional strata/groupings. Then, one aggregate distribution will be returned for each unique combination of the `group_by` elements.
-
-```{r}
-# aggregate case and death targets separately
-aggs <- aggregate_cdfs(data = preds,            # predictions
-                       id_var = "id",           # prediction identifier
-                       group_by = c("target"),  # column names that specify groups
-                       method = "LOP",          # aggregation method
-                       ret_quantiles = rq       # quantiles to return
-)
-
-
-# aggs object has both incident cases and deaths
-head(aggs %>% arrange(quantile))
-```
-
-We can plot these two aggregates to see the full distribution.
-    
-```{r, echo = FALSE, fig.width = 7}
-ggplot(data = preds, aes(x = value, y = quantile)) +
-  geom_line(aes( group = id), size = 0.5) + 
-  geom_line(data = aggs, color = "#377EB8", size = 1) +
-  facet_grid(cols = vars(target), scales = "free", switch = "x") +
-  labs(x = "", 
-       y = "cumulative probability") +
-  scale_y_continuous(breaks = c(0,1)) +
-  theme_classic() + 
-  theme(strip.background = element_blank(),
-        strip.placement = "outside")
-```
-
-
-## Implementation details
-
-1. *CDF checks:* The `CombineDistributions` package implements two checks on all distributions to be aggregated. 
-
-    + monotonic CDFs: for a set of increasing quantiles, $q_i$, check that the values are also increasing monotonically, i.e., $F(q_i) \leq F(q_{i+1})$.
-    
-    + NA values: check that no quantile or value is NA. 
-    
-    If a CDF fails either check, it will be excluded from aggregation and a warning message will be displayed.
-
-2. *Defining a CDF:* This package assumes that CDFs for each individual prediction are defined as a set of value-quantile pairs. Therefore, a method is needed to interpolate quantiles or values between defined pairs and, in some cases, extrapolate beyond the set of value-quantile pairs. 
-
-    + For this package, we use linear interpolation (`approx()`). The limitations of this choice are more significant when the CDF is defined over fewer value-quantile pairs. 
-
-    + We assume the CDF jumps to 0 and 1 outside the smallest and largest value-quantile pairs. Because we do not attempt to estimate tail probabilities, it is recommended that tail probabilities of the individual distribution are sufficiently well defined (espeically when those probabilities are of interest in the aggregate).
-
-    Below is an example of a set of value-quantile pairs and the corresponding piecewise-linear approximation with jumps that would be aggregated by `CombineDistributions`.
-
-    ```{r echo = FALSE}
-plot_ex = preds %>% filter(id == "A" & value %in% x[x%%7==0])
-aprx = approx(x = plot_ex$quantile, 
-              y = plot_ex$value, 
-              xout = seq(0,1,0.01), 
-              rule = 2)
-ggplot(data = plot_ex, aes(x = value, y = quantile)) + 
-  geom_point(aes(color = "defined value-quantile pairs")) +
-  geom_line(data = data.frame(value = aprx$y, quantile =aprx$x), aes(color = "interpolated CDF")) +
-  labs(x = "value") +
-  scale_color_manual(values = c("black", "grey"), 
-                     guide = guide_legend(override.aes = list(
-                       linetype = c("blank", "solid"), 
-                       shape = c(19, NA)
-                     ))) +
-  scale_y_continuous(breaks = c(0,1)) +
-  theme_classic() +
-  theme(legend.position = c(0.75, 0.25), 
-        legend.title = element_blank())
-```
-
 
 ## References

@@ -13,3 +13,5 @@ navbar:
         href: articles/SIRS-vignette.html
       - text: Aggregation and trimming on real-world COVID-19 death predictions
         href: articles/MMODS-vignette.html
+      - text: Example Analysis
+        href: articles/tidy-tuesday-example-analysis.html
