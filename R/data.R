@@ -36,3 +36,15 @@
 #'
 #' @source \url{https://github.com/MMODS-org/Elicitation-1}
 "MMODS_obs"
+
+#' Weather Forecast Accuracy
+#'
+#' @format A tt_data object with 3 elements
+#' \describe{
+#'   \item{weather_forecasts}{a data frame with 651968 rows and 10 variables}
+#'   \item{cities}{a data frame with 236 rows and 11 variables}
+#'   \item{outlook_meanings}{a data frame with 23 rows and 2 variables}
+#' }
+#'
+#' @source \url{https://github.com/rfordatascience/tidytuesday/tree/master/data/2022/2022-12-20}
+"tuesdata"

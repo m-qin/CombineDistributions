@@ -20,27 +20,32 @@ knitr::opts_chunk$set(
   fig.height = 4,
   fig.width = 5
 )
+
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 ```
 
 This vignette demonstrates the `LOP()` and `vincent()` functions on the **Weather Forecast Accuracy** dataset, which is a part of the [TidyTuesday](https://github.com/rfordatascience/tidytuesday) project.
 
-In this vignette, I seek to...
+In this vignette, I seek to... for Maryland...
 
-### Get Data and Generate Distributions for the Weather Projections
+### Get Data for the Weather Projections for Maryland
 
 The data and data dictionary are available [here](https://github.com/rfordatascience/tidytuesday/tree/master/data/2022/2022-12-20).
 
 ```{r get-data}
 library(tidytuesdayR) # contains function to load data; alternative is to download from github URL (see below)
+library(usethis)
+library(dplyr)
 
 # test if a directory named "data" exists locally, if not create it
-if (!dir.exists(paste0(dir, "data"))){
-  dir.create(paste0(dir, "data"))
+if (!dir.exists("data")){
+  dir.create("data")
 }
 
 # read the data; download locally if not already downloaded
 if (!file.exists("data/tuesdata.rda")){
   tuesdata <- tidytuesdayR::tt_load('2022-12-20') # can also use tidytuesdayR::tt_load(2022, week = 51)
+  usethis::use_data(tuesdata)
   
   # Alternatively, read in the data manually
   # weather_forecasts <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-12-20/weather_forecasts.csv')
@@ -48,11 +53,15 @@ if (!file.exists("data/tuesdata.rda")){
   # outlook_meanings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-12-20/outlook_meanings.csv')
 } else data(tuesdata)
 
-# extract parts of the data
+# get relevant data frame(s)
 weather_forecasts <- tuesdata$weather_forecasts
-cities <- tuesdata$cities
 outlook_meanings <- tuesdata$outlook_meanings
+
+# get Maryland data
+
 ```
+
+### Generate Distributions for the Weather Projections
 
 I will use a normal model...
 
