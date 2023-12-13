@@ -22,28 +22,30 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette demonstrates `CombineDistribution`'s ?? and ?? functions on the dataset ?? from [TidyTuesday](https://github.com/rfordatascience/tidytuesday).
+This vignette demonstrates the `LOP()` and `vincent()` functions on the **Weather Forecast Accuracy** dataset, which is a part of the [TidyTuesday](https://github.com/rfordatascience/tidytuesday) project.
 
+In this vignette, I seek to...
 
-## Unweighted aggregation
+### First, get the data
 
-When aggregating probabilistic predictions, we can perform operations on the probabilities or the quantiles. Here, we focus on averages (i.e., probability averaging or Linear Opinion Pool, and quantile averaging or Vincent average).
+The data and data dictionary are available [here](https://github.com/rfordatascience/tidytuesday/tree/master/data/2022/2022-12-20).
 
-If we consider a set of probabilistic predictions, each represented by a cumulative distribution function (CDF), $F_i(x)$ where $x$ is the possible future outcome and $F_i(x)$ is the probability that the outcome is less than or equal to $x$. Then, define the quantile function, $F_i^{-1}(\theta)$ for some quantile $\theta$.
+```{r get-data}
+library(tidytuesdayR)
 
-To aggregate using the LOP method, we compute the arithmetic mean of cumulative probabilities at each $x$ value, or
+tuesdata <- tidytuesdayR::tt_load('2022-12-20') # can also use tidytuesdayR::tt_load(2022, week = 51)
 
-$$
-F_{LOP}(x) = \sum_{i = 1}^{N}w_iF_i(x)
-$$ for $N$ models and weights $w_i$.
+weather_forecasts <- tuesdata$weather_forecasts
+cities <- tuesdata$cities
+outlook_meanings <- tuesdata$outlook_meanings
 
-Conversely, for the Vincent average, we calculate the arithmetic mean of values, $x$, at each quantile $\theta$, or
+# Alternatively, read in the data manually (doesn't require tidytuesdayR package)
 
-$$
-F_{V}(\theta) = \sum_{i = 1}^{N}w_iF_i^{-1}(\theta)
-$$ 
+# weather_forecasts <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-12-20/weather_forecasts.csv')
+# cities <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-12-20/cities.csv')
+# outlook_meanings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-12-20/outlook_meanings.csv')
+```
 
-also  for $N$ models and weights $w_i$.
 
 ### A simple example
 
