@@ -3,9 +3,10 @@ library(dplyr)
 library(readxl)
 library(httr)
 
+# dir <- rprojroot::find_rstudio_root_file()
 
 countryattr_path <- 'https://raw.githubusercontent.com/MMODS-org/Elicitation-1/main/data/processed/county/county_attributes.xlsx'
-countryattr_local_path <- "data/inst/extdata/county_attributes.xlsx"
+countryattr_local_path <- "/inst/extdata/county_attributes.xlsx"
 countydeaths_path <-'https://raw.githubusercontent.com/MMODS-org/Elicitation-1/main/data/processed/county/time_series_covid19_deaths_US.csv'
 
 # get data
