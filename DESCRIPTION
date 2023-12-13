@@ -10,7 +10,7 @@ Authors@R:
              family = "Qin",
              comment = c(role = "Created this website for class demo",
                          ORCID = "0000-0003-0391-6527")))
-Description: What the package does (one paragraph).
+Description: 
 License: CC-BY-NC (http://creativecommons.org/licenses/by-nc/3.0/)
 Encoding: UTF-8
 LazyData: true
