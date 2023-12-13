@@ -9,11 +9,12 @@ Authors@R:
              comment = c(ORCID = "0000-0002-0639-3728")),
       person(given = "Michelle",
              family = "Qin",
+             role = "",
              email = "mqin8@jh.edu",
              comment = c(role = "Created this website for class demo",
                          ORCID = "0000-0003-0391-6527")))
 Description: This package implements multiple methods for combining probabilistic predictions, including probability and quantile averaging, i.e.,   Linear Opinion Pool (Stone 1961) and Vincent average (Vincent 1912, Ratcliff 1979) respectively, as well as non-equal weighting, including trimming methods (Jose 2014).
-License: CC-BY-NC (http://creativecommons.org/licenses/by-nc/3.0/)
+License: CC-BY-NC
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
@@ -24,6 +25,7 @@ Suggests:
     foreach,
     ggplot2,
     knitr,
+    reshape2,
     rmarkdown,
     pracma,
     readr,
@@ -37,6 +39,5 @@ Depends:
 Imports: 
     dplyr,
     tibble,
-    magrittr,
-    reshape2
+    magrittr
 VignetteBuilder: knitr
