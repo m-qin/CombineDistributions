@@ -10,6 +10,7 @@
 #' @param ret_quantiles vector of quantiles to return specifying the aggregate distribution
 #' @param ret_values vector of values to return specifying the aggregate distribution
 #' @param weight_fn function? specifying how to weight each model *FIX
+#' @param ... additional arguments
 #'
 #' @return vector of values for corresponding \code{ret_quantiles} of aggregate distribution
 #'

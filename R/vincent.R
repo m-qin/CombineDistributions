@@ -41,7 +41,7 @@ calculate_aggregate_vin <- function(data, ret_quantiles, ret_values){ #model_wei
   return(vinc_agg)
 }
 
-#' function to interpolate to consistent quantiles
+# function to interpolate to consistent quantiles
 evaluate_qf <- function(quantile, value, id, ret_quants){
   # create df to store interpolations
   interp_functions <- data.frame(quantile = double(),
