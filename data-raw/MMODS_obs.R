@@ -4,11 +4,13 @@ library(readxl)
 library(httr)
 
 
-countryattr_path <- 'https://raw.githubusercontent.com/MMODS-org/Elicitation-1/main/data/processed/county/county_attributes.csv'
+countryattr_path <- 'https://raw.githubusercontent.com/MMODS-org/Elicitation-1/main/data/processed/county/county_attributes.xlsx'
+countryattr_local_path <- "data/county_attributes.xlsx"
 countydeaths_path <-'https://raw.githubusercontent.com/MMODS-org/Elicitation-1/main/data/processed/county/time_series_covid19_deaths_US.csv'
 
 # get data
-df_county_attr <- read.csv(countryattr_path)
+download.file(url = countryattr_path, destfile = countryattr_local_path)
+df_county_attr <- read_xlsx(countryattr_local_path)
 df_county_deaths <- read.csv(countydeaths_path)
 
 
