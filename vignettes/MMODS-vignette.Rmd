@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
-knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+# knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 
 fig_path <- "figures/"
 data_raw_path <- "data-raw/"
@@ -68,15 +68,16 @@ library(cowplot)
 First, we load the data (both individual model projections and post-hoc observations). These data are provided in the package.
 
 ```{r load-proj}
-# load data from MMODS github
-source(paste0(data_raw_path, "MMODS.R"))
-source(paste0(data_raw_path, "MMODS_obs.R"))
-
 # individual projections
-data(MMODS)
+if (!file.exists("data/MMODS.rda")){
+  source(paste0(data_raw_path, "MMODS.R"))
+} else data(MMODS)
 
 # observations
-data(MMODS_obs)
+if (!file.exists("data/MMODS_obs.rda")){
+  source(paste0(data_raw_path, "MMODS_obs.R"))
+} else data(MMODS_obs)
+
 
 MMODS_obs <- MMODS_obs %>%
   select(Population, cumu_deaths) %>%

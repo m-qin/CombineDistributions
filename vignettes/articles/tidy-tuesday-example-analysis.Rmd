@@ -1,6 +1,6 @@
 ---
 title: "Example Analysis"
-bibliography: bibfile.bib
+bibliography: ../bibfile.bib
 output: 
   rmarkdown::html_vignette
 vignette: >
@@ -26,28 +26,38 @@ This vignette demonstrates the `LOP()` and `vincent()` functions on the **Weathe
 
 In this vignette, I seek to...
 
-### First, get the data
+### Get Data and Generate Distributions for the Weather Projections
 
 The data and data dictionary are available [here](https://github.com/rfordatascience/tidytuesday/tree/master/data/2022/2022-12-20).
 
 ```{r get-data}
-library(tidytuesdayR)
+library(tidytuesdayR) # contains function to load data; alternative is to download from github URL (see below)
 
-tuesdata <- tidytuesdayR::tt_load('2022-12-20') # can also use tidytuesdayR::tt_load(2022, week = 51)
+# test if a directory named "data" exists locally, if not create it
+if (!dir.exists(paste0(dir, "data"))){
+  dir.create(paste0(dir, "data"))
+}
 
+# read the data; download locally if not already downloaded
+if (!file.exists("data/tuesdata.rda")){
+  tuesdata <- tidytuesdayR::tt_load('2022-12-20') # can also use tidytuesdayR::tt_load(2022, week = 51)
+  
+  # Alternatively, read in the data manually
+  # weather_forecasts <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-12-20/weather_forecasts.csv')
+  # cities <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-12-20/cities.csv')
+  # outlook_meanings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-12-20/outlook_meanings.csv')
+} else data(tuesdata)
+
+# extract parts of the data
 weather_forecasts <- tuesdata$weather_forecasts
 cities <- tuesdata$cities
 outlook_meanings <- tuesdata$outlook_meanings
-
-# Alternatively, read in the data manually (doesn't require tidytuesdayR package)
-
-# weather_forecasts <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-12-20/weather_forecasts.csv')
-# cities <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-12-20/cities.csv')
-# outlook_meanings <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2022/2022-12-20/outlook_meanings.csv')
 ```
 
+I will use a normal model...
 
-### A simple example
+
+### Analysis using `LOP()` and `vincent()`
 
 Below, we show how to implement these two methods using `CombineDistributions` for a simple example using normal distributions. First, let's load the packages we will need.
 
