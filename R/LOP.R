@@ -15,7 +15,7 @@
 #'
 #' @examples
 #' dat <- expand.grid(id = c("A", "B"),
-#'                    quantile = seq(0,1,0.01)),
+#'                    quantile = seq(0,1,0.01))
 #' dat$value <- ifelse(dat$id == "A", qnorm(dat$quantile), qnorm(dat$quantile, 0,2))
 #' LOP(dat$quantile, dat$value, dat$id, seq(0,1,0.05), NA)
 #'
