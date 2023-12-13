@@ -11,6 +11,8 @@ All code is licensed under the CC-BY-NC Creative Commons attribution-noncommerci
 
 <center>Howerton et al. Submitted. </center>
 
+and is available on GitHub at [https://github.com/eahowerton/CombineDistributions](https://github.com/eahowerton/CombineDistributions).
+
 
 ## Installation
 
@@ -19,6 +21,7 @@ You can install the released version of CombineDistributions from GitHub with:
 ``` r
 remotes::install_github("eahowerton/CombineDistributions")
 ```
+
 ## Vignettes
 Please reference our vignettes to see examples of the functionality in `CombineDistributions`. 
 
@@ -29,15 +32,14 @@ Please reference our vignettes to see examples of the functionality in `CombineD
 3. Aggregation and trimming on real-world COVID-19 death predictions: this vignette aggregates projections on COVID-19 deaths from 17 distinct epidemiological models, including varying the aggregation approach and the weighting scheme.
 
 ## References
+
+Howerton, Emily, Runge, Michael C., Bogich, Tiffany L., Borchering, Rebecca K., Inamine, Hidetoshi, Lessler, Justin, Mullany, Luke C., Probert, William J. M., Smith, Claire P., Truelove, Shaun, Viboud, Cécile, and Shea, Katriona. 2023. "Context-dependent representation of within- and between-model uncertainty: aggregating probabilistic predictions in infectious disease epidemiology." J. R. Soc. Interface 20:20220659. http://doi.org/10.1098/rsif.2022.0659.
+
 Jose, Victor Richmond R., Yael Grushka-Cockayne, and Kenneth C. Lichtendahl. 2014. “Trimmed Opinion Pools and the Crowd’s Calibration Problem.” Management Science 60 (2): 463–75. https://doi.org/10.1287/mnsc.2013.1781.
 
 Ratcliff, Roger. 1979. “Group Reaction Time Distributions and an Analysis of Distribution Statistics.” Psychological Bulletin 86 (3): 446–61. https://doi.org/10.1037/0033-2909.86.3.446.
 
-
 Stone, M. 1961. “The Opinion Pool.” The Annals of Mathematical Statistics 32 (4): 1339–42.
 
 Vincent, Stella Burnham. 1912. “The Function of the Vibrissae in the Behavior of the White Rat.” Cambridge MA: Holt.
-
-
-
 
