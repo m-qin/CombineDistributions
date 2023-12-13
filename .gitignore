@@ -4,3 +4,4 @@
 apply_to_SMH.R
 *.csv
 inst/doc
+docs
