@@ -48,9 +48,8 @@ and is available on GitHub at [https://github.com/eahowerton/CombineDistribution
 
 You can install the released version of CombineDistributions from GitHub with:
 
-``` r
-remotes::install_github("eahowerton/CombineDistributions")
-```
+    remotes::install_github("eahowerton/CombineDistributions")
+
 
 ## Vignettes
 Please reference our vignettes to see examples of the functionality in `CombineDistributions`. 

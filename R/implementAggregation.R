@@ -46,7 +46,7 @@ aggregate_cdfs <- function(data, id_var, group_by, method, ret_quantiles, ret_va
   return(aggs)
 }
 
-#' export
+#'
 calculate_single_aggregate <- function(quant, val, id, method, ret_quantiles, ret_values,
                                        weighting_scheme = "equal", reorder_quantiles, ...){
   with(list(...),{
