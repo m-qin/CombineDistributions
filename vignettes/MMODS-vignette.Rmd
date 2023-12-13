@@ -23,6 +23,7 @@ knitr::opts_chunk$set(
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 
 fig_path <- "figures/"
+data_raw_path <- "data-raw/"
 ```
 
 ```{r setup-plot, echo = FALSE}
@@ -67,6 +68,10 @@ library(cowplot)
 First, we load the data (both individual model projections and post-hoc observations). These data are provided in the package.
 
 ```{r load-proj}
+# load data from MMODS github
+source(paste0(data_raw_path, "MMODS.R"))
+source(paste0(data_raw_path, "MMODS_obs.R"))
+
 # individual projections
 data(MMODS)
 
