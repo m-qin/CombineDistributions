@@ -200,14 +200,14 @@ vin_pdf <- data.frame(value = x,
 
 Plotting the results demonstrates the difference between the two methods: the LOP treats individual predictions as alternate possibilities, and retains the uncertainty captured between these individual predictions, whereas the Vincent average treats individual predictions as noisy samples and averages away the uncertainty captured between the predictions.
 
-```{r plot-cdfs2, echo = FALSE}
+```{r plot-pdfs, echo = FALSE}
 both_pdf <- ggplot(data = preds_pdf,
                    aes(x = value, y = prob)) +
   geom_line(aes(group = id), color = "black", size = 0.5) +
   geom_line(data = LOP_pdf, aes(color = "Linear Opinion Pool"), size = 1) +
   geom_line(data = vin_pdf, aes(color = "Vincent average"), size = 1) +
   labs(x = "incident cases", 
-       y = "cumulative probability")+
+       y = "probability density")+
   scale_color_manual(values = c("#377EB8", "#ff7f00"))+
   theme_classic()+
   theme(legend.position = c(0.2,0.9), 
