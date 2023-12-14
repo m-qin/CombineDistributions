@@ -37,3 +37,4 @@ Imports:
     tibble,
     magrittr
 VignetteBuilder: knitr
+URL: https://m-qin.github.io/CombineDistributions/

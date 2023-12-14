@@ -1,4 +1,4 @@
-url: ~
+url: https://m-qin.github.io/CombineDistributions/
 template:
   bootstrap: 5
   bootswatch: yeti
@@ -15,3 +15,4 @@ navbar:
         href: articles/MMODS-vignette.html
       - text: Example Analysis
         href: articles/tidy-tuesday-example-analysis.html
+
