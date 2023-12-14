@@ -22,10 +22,12 @@ Suggests:
     reshape2,
     rmarkdown,
     pracma,
+    purrr,
     readr,
     scales,
     tidyr,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    usethis
 Config/testthat/edition: 3
 Depends: 
     data.table,

@@ -17,8 +17,8 @@ knitr::opts_chunk$set(
   warning = FALSE, 
   message = FALSE,
   comment = "#>",
-  fig.height = 4,
-  fig.width = 5
+  fig.height = 5,
+  fig.width = 7
 )
 
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
@@ -26,17 +26,24 @@ knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 
 This vignette demonstrates the `LOP()` and `vincent()` functions on the **Weather Forecast Accuracy** dataset, which is a part of the [TidyTuesday](https://github.com/rfordatascience/tidytuesday) project.
 
-In this vignette, I seek to... for Maryland...
+In this vignette, I seek to evaluate the National Weather Services's 12-, 24-, 36-, and 48-hour ahead forecasts of the daily high temperature for Baltimore, Maryland between December 1, 2021 and December 31, 2021.
 
-### Get Data for the Weather Projections for Maryland
+### Daily High Temperature Forecasts for Baltimore, MD
 
 The data and data dictionary are available [here](https://github.com/rfordatascience/tidytuesday/tree/master/data/2022/2022-12-20).
 
-```{r get-data}
+```{r load-packages}
 library(tidytuesdayR) # contains function to load data; alternative is to download from github URL (see below)
 library(usethis)
+library(tidyr)
 library(dplyr)
+library(purrr)
+library(CombineDistributions) 
+library(ggplot2)
+library(cowplot)
+```
 
+```{r get-data}
 # test if a directory named "data" exists locally, if not create it
 if (!dir.exists("data")){
   dir.create("data")
@@ -55,187 +62,214 @@ if (!file.exists("data/tuesdata.rda")){
 
 # get relevant data frame(s)
 weather_forecasts <- tuesdata$weather_forecasts
-outlook_meanings <- tuesdata$outlook_meanings
 
-# get Maryland data
+# get Baltimore Dec 1-31, 2021 data
+bmore_forecasts <- weather_forecasts %>%
+  filter(state == "MD", city == "BALTIMORE", date >= as.Date("2021-12-01"), date <= as.Date("2021-12-31")) %>%
+  drop_na(forecast_temp)
 
+# get high temperatures
+highs <- bmore_forecasts %>%
+  filter(high_or_low == "high") %>%
+  select(-c(city, state, high_or_low, observed_precip, forecast_outlook, possible_error)) %>%
+  pivot_longer(cols = c(forecast_temp, observed_temp), names_to = "type", values_to = "temp")
+
+# split data into lists
+highs_by_hour <- highs %>%
+  group_by(forecast_hours_before) %>%
+  group_split()
+highs_by_date <- highs %>%
+  group_by(date) %>%
+  group_split()
 ```
 
-### Generate Distributions for the Weather Projections
+### Exploratory Plot
 
-I will use a normal model...
-
-
-### Analysis using `LOP()` and `vincent()`
-
-Below, we show how to implement these two methods using `CombineDistributions` for a simple example using normal distributions. First, let's load the packages we will need.
-
-```{r preamble}
-# for aggregation
-library(CombineDistributions) 
-# for data manipulation
-library(dplyr) 
-# for plotting
-library(ggplot2)
-library(cowplot)
+```{r eda}
+ggplot(highs) +
+  geom_line(aes(x = date, y = temp, linetype = type)) +
+  facet_wrap(vars(forecast_hours_before), labeller = as_labeller(c(`12` = "12 hours ahead",
+                                                                   `24` = "24 hours ahead",
+                                                                   `36` = "36 hours ahead",
+                                                                   `48` = "48 hours ahead"))) +
+  theme_bw() +
+  xlab("Date (in December 2021)") +
+  ylab("Temperature (F)") +
+  scale_linetype_discrete(name = "", labels = c("Forecast", "Observed"))
 ```
 
-Specifically, for this example we will aggregate two normal distributions, $N(\mu = 100, \sigma = 10)$ and $N(\mu = 120, \sigma = 5)$. Let's define these two distributions at particular values, `x`.
+### Simulate Distributions for the Weather Forecasts
 
-```{r define-ind-cdfs}
-# set range of x values over which to define cdfs
-x <- 80:140
+The `CombineDistributions` package is designed to aggregate multiple probabilistic models into a single probabilistic model. In this example, I will treat the 12-hour, 24-hour, 36-hour, and 48-hour-ahead forecasts as four separate models for the same estimand (the daily high temperature). Unfortunately, this dataset provides point estimates only, with no measures of uncertainty (such as a confidence interval, or better yet for using this package, a probability density). Therefore, I will generate a normal distribution for each model, centered at the National Weather Service's point estimate and using an empirical standard deviation for each model since I expect further-ahead forecasts to have greater uncertainty.
 
-# set CDFs
-mean1 = 100
-sig1 = 10
-pred1 <- data.frame(value = x, 
-                     quantile = pnorm(x, mean1, sig1))
-mean2 = 120
-sig2 = 5
-pred2 <- data.frame(value = x, 
-                     quantile = pnorm(x, mean2, sig2))
+```{r generate-probabilistic-models}
+quantiles_to_be_specified <- seq(0.01, 0.99, 0.01)
+
+high_forecasts_by_hour <- map(.x = highs_by_hour, .f = ~filter(.x, type == "forecast_temp"))
+high_forecasts_by_date <- map(.x = highs_by_date, .f = ~filter(.x, type == "forecast_temp"))
+high_forecasts_by_date[[15]] <- NULL # only 12, 24, and 36 hour ahead forecasts on Dec 15
+high_forecasts_by_date[[14]] <- NULL # only 12, 36, and 48 hour ahead forecasts on Dec 15
+
+sd_vec <- map_dbl(.x = high_forecasts_by_hour, .f = ~sd(.x$temp))
+
+high_distributions_by_date <- lapply(X = high_forecasts_by_date,
+                                     FUN = function(date_tibble) map2(.x = date_tibble %>% arrange(forecast_hours_before) %>% select(temp),
+                                                                      .y = sd_vec,
+                                                                      .f = ~qnorm(quantiles_to_be_specified, mean = .x, sd = .y))) %>%
+  lapply(function(ls) data.frame(value = unlist(ls),
+                                 quantile = rep(quantiles_to_be_specified, 4),
+                                 id = rep(c("12", "24", "36", "48"), each = length(quantiles_to_be_specified))))
 ```
 
-We can aggregate these distributions using the `aggregate_cdfs()` function. This function requires all distributions be included in a single `data.frame` object with columns `quantile` and `value` (to define each CDF) and some column to distinguish between predictions.
 
-So let's put both predictions into a single `data.frame` and add an `id` column.
+### Analyze Forecast Models using `LOP()` and `vincent()`
 
-```{r all-cdfs}
-preds <- bind_rows(pred1 %>% 
-                     mutate(id = "A"), 
-                   pred2 %>% 
-                     mutate(id = "B"))
+I can now aggregate the 12-hour, 24-hour, 36-hour, and 48-hour-ahead forecasts for each day in December 2021, first using linear opinion pool (LOP) averaging, then using Vincent averaging.
+
+For illustration purposes, I will show only the result for December 31, 2021.
+
+```{r LOP-vincent-quantiles}
+dec31_high_distributions <- high_distributions_by_date[[29]] %>%
+  arrange(quantile)
+
+dec31_lop <- LOP(quantile = dec31_high_distributions$quantile,
+                 value = dec31_high_distributions$value,
+                 id = as.character(dec31_high_distributions$id),
+                 ret_quantiles = quantiles_to_be_specified,
+                 ret_values = NA)
+
+dec31_vincent <- vincent(quantile = dec31_high_distributions$quantile,
+                         value = dec31_high_distributions$value,
+                         id = as.character(dec31_high_distributions$id),
+                         ret_quantiles = quantiles_to_be_specified,
+                         ret_values = NA)
+
+# get observed high temp and point estimates for each model
+dec31_obs <- highs %>%
+  filter(date == as.Date("2021-12-31"), type == "observed_temp") %>%
+  arrange(forecast_hours_before)
+dec31_pred <- highs %>%
+  filter(date == as.Date("2021-12-31"), type == "forecast_temp") %>%
+  arrange(forecast_hours_before)
 ```
 
-Now, let's aggregate using LOP. We do this by setting `method = "LOP"` in the function call. We also have to define the quantiles over which we would like the aggregate CDF to be returned.
 
-```{r LOP-cdf}
-rq <- seq(0.01,0.99, 0.01)
-
-LOP <- aggregate_cdfs(data = preds, # predictions
-               id_var = "id",       # prediction identifier
-               method = "LOP",      # aggregation method
-               ret_quantiles = rq   # quantiles to return
-               )
-```
-
-We can also aggregate using the Vincent average.
-
-```{r Vincent-cdf}
-vin <- aggregate_cdfs(data = preds, # predictions
-               id_var = "id",       # prediction identifier
-               method = "vincent",  # aggregation method
-               ret_quantiles = rq   # quantiles to return
-               )
-```
-
-Now, let's plot the individual (black) and aggregate predictions as cumulative distribution functions (CDFs).
-
-```{r plot-cdfs, fig.width=7}
+```{r plot-cdfs, fig.width=7, eval=F, echo=F}
 # define sample lines for plotting
-lines_LOP_x = c(90, 100, 110, 120)
-lines_LOP = data.frame(value = c(lines_LOP_x, lines_LOP_x), 
-                       quantile = c(pnorm(lines_LOP_x,mean1,sig1),pnorm(lines_LOP_x,mean2,sig2)),
-                       group = c(1,2,3,4,1,2,3,4))
+lines_LOP_x = c(35,45,55,65,75)
+lines_LOP = data.frame(value = rep(lines_LOP_x, 4), 
+                       quantile = c(pnorm(lines_LOP_x, dec31_pred$forecast_hours_before[1], sd_vec[1]),
+                                    pnorm(lines_LOP_x, dec31_pred$forecast_hours_before[2], sd_vec[2]),
+                                    pnorm(lines_LOP_x, dec31_pred$forecast_hours_before[3], sd_vec[3]),
+                                    pnorm(lines_LOP_x, dec31_pred$forecast_hours_before[4], sd_vec[4])),
+                       group = rep(1:length(lines_LOP_x), 4))
 # plot LOP cdfs
-lop_cdf <- ggplot(data = preds, aes(x = value, y = quantile))+
+lop_cdf <- ggplot(data = dec31_high_distributions, aes(x = value, y = quantile))+
   geom_line(data = lines_LOP, aes(group = as.factor(group)), 
             size = 0.3, linetype = "dotted", color = "#377EB8")+
   geom_line(aes(group = id), size = 0.5)+
-  geom_line(data = LOP, size = 1, color = "#377EB8") +
+  geom_line(data = dec31_lop, size = 1, color = "#377EB8") +
   # along a single line, take the mean of each cum. probability and plot a point
   geom_point(data = lines_LOP %>% 
                group_by(value, group) %>% 
                summarise(quantile = mean(quantile)),size =2, color = "#377EB8")+
-  labs(x = "incident cases", 
-       y = "cumulative probability", 
-       subtitle = "Linear opinion pool")+
+  labs(x = "Temperature (F)", 
+       y = "Cumulative Probability Density (CDF)", 
+       subtitle = "Linear Opinion Pool (LOP)")+
   scale_y_continuous(breaks = c(0,1)) +
   theme_classic() +
   theme(legend.position = "none", 
         legend.title = element_blank())
-
-# define sample lines for plotting
-lines_V = data.frame(value = c(qnorm(0.25,mean1, sig1), qnorm(0.5,mean1, sig1), qnorm(0.75,mean1, sig1),
-                           qnorm(0.25, mean2, sig2), qnorm(0.5, mean2, sig2), qnorm(0.75, mean2, sig2)),
-                     quantile = c(0.25,0.5,0.75,0.25,0.5,0.75),
-                     group = c(1,2,3,1,2,3))
-# plot vincent cdfs
-vinc_cdf <- ggplot(data = preds, aes(x = value, y = quantile))+
-  geom_line(data = lines_V, aes(group = as.factor(group)), 
-            size = 0.3, linetype = "dotted", color = "#ff7f00")+
-  geom_line(aes(group = id), size = 0.5)+
-  geom_path(data = vin, size = 1, color = "#ff7f00") +
-  # along a single quantile line, take the mean of each value and plot a point
-  geom_point(data = lines_V %>% 
-               group_by(quantile, group) %>% 
-               summarise(value = mean(value)),size =2, color = "#ff7f00")+
-  labs(x = "incident cases", 
-       y = "cumulative probability", 
-       subtitle = "Vincent average")+
-  scale_y_continuous(breaks = c(0,1)) +
-  theme_classic() +
-  theme(legend.position = "none", 
-        legend.title = element_blank())
-
-plot_grid(lop_cdf, vinc_cdf, nrow = 1)
 ```
 
-Next we'll plot the probability density functions (PDFs), $f_i(x)$ to highlight the difference between the two approaches. Because our predictions are defined as CDFs, we will use a few tricks to obtain the PDFs.
 
-1. The LOP operation defined above (operating on CDFs) is equivalent to operating on PDFs, so $f_{LOP}(x) = \sum_{i = 1}^Nw_if_i(x)$. 
-
-2. The Vincent average of distributions from the same location-scale family (i.e., defined with location and scale paramter) will also be from that location-scale family, and the parameters of the aggregate are the average of those from the individual distributions [@thomas_appropriate_1980]. This property applies to our case, because we are aggregating normal distributions. So, the Vincent average aggregate will be a normal distribution with $\mu_V = mean(\mu_1, \mu_2)$ and $\sigma_v = mean(\sigma_1, \sigma_2)$.
-
-Let's implement these operations to plot the PDFs. First, we define the equivalent individual PDFs.
-
-```{r define-ind-pdfs}
+```{r define-pdfs}
 # set PDFs
-mean1 = 100
-sig1 = 10
+x_min <- round(min(dec31_high_distributions$value))
+x_max <- round(max(dec31_high_distributions$value))
+x <- x_min:x_max
+
 pred1_pdf <- data.frame(value = x, 
-                        prob = dnorm(x, mean1, sig1))
-mean2 = 120
-sig2 = 5
+                        prob = dnorm(x, dec31_pred$temp[1], sd_vec[1]))
 pred2_pdf <- data.frame(value = x, 
-                        prob = dnorm(x, mean2, sig2))
+                        prob = dnorm(x, dec31_pred$temp[2], sd_vec[2]))
+pred3_pdf <- data.frame(value = x, 
+                        prob = dnorm(x, dec31_pred$temp[3], sd_vec[3]))
+pred4_pdf <- data.frame(value = x, 
+                        prob = dnorm(x, dec31_pred$temp[4], sd_vec[4]))
 
 # combine into single data.frame
 preds_pdf <- bind_rows(pred1_pdf %>% 
-                         mutate(id = "A"), 
+                         mutate(id = "12"), 
                        pred2_pdf %>% 
-                         mutate(id = "B"))
+                         mutate(id = "24"),
+                       pred3_pdf %>% 
+                         mutate(id = "36"), 
+                       pred4_pdf %>% 
+                         mutate(id = "48"))
 ```
 
-Now, let's implement the above rule to find the PDF of the LOP and Vincent average aggregates.
 
-```{r LOP-pdf}
+```{r LOP-vincent-pdf}
 LOP_pdf <- preds_pdf %>%
   group_by(value) %>% 
   summarize(prob = mean(prob))
 
 vin_pdf <- data.frame(value = x, 
-                      prob = dnorm(x, mean(c(mean1, mean2)), c(mean(sig1, sig2))))
+                      prob = dnorm(x, mean(dec31_pred$temp), c(mean(sd_vec))))
 ```
 
-Plotting the results demonstrates the difference between the two methods: the LOP treats individual predictions as alternate possibilities, and retains the uncertainty captured between these individual predictions, whereas the Vincent average treats individual predictions as noisy samples and averages away the uncertainty captured between the predictions.
-
-```{r plot-cdfs2}
+```{r plot-pdfs}
 both_pdf <- ggplot(data = preds_pdf,
                    aes(x = value, y = prob)) +
   geom_line(aes(group = id), color = "black", size = 0.5) +
   geom_line(data = LOP_pdf, aes(color = "Linear Opinion Pool"), size = 1) +
   geom_line(data = vin_pdf, aes(color = "Vincent average"), size = 1) +
-  labs(x = "incident cases", 
-       y = "cumulative probability")+
+  geom_vline(data = dec31_obs, aes(xintercept = temp), linetype = "dashed") +
+  labs(x = "Temperature (F)", 
+       y = "Probability Density Function (PDF)",
+       caption = "Predicted High Temperature for December 31, 2021\nObserved High Temperature as Dashed Line")+
   scale_color_manual(values = c("#377EB8", "#ff7f00"))+
   theme_classic()+
   theme(legend.position = c(0.2,0.9), 
-        legend.title = element_blank())
+        legend.title = element_blank(),
+        plot.caption = element_text(hjust = 0.5))
 both_pdf
 ```
 
-In cases where these rules do not apply, we can obtain aggregate PDFs by sampling from the aggregate CDF. See the SIRS vignette for an example.
+### Concluding Thoughts
+
+In the above illustration, we can see that the linear opinion pool had more uncertainty than the Vincent average, which seemed better here since the models overestimated the high temperature for December 31, 2021. As a next step, I would want to plot the LOP and Vincent average models for each day between December 1 and 31, 2021 as a time series, with the uncertainties expressed as a `geom_ribbon()` perhaps as 95% prediction intervals.
+
+### List of Functions Used
+
+`usethis`
+
+- `use_data()`
+
+`dplyr`
+
+- `filter()`
+- `select()`
+- `group_by()`
+- `group_split()`
+
+`tidyr`
+
+- `pivot_longer()`
+- `drop_na()`
+
+`purrr`
+
+- `map()`
+- `map_dbl()`
+- `map2()`
+
+`ggplot2`
+
+- `facet_wrap()`
+- `geom_line()`
+- `geom_vline()`
+
 
 ## References
